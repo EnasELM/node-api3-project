@@ -1,7 +1,7 @@
 const express = require('express');
 
 const server = express();
-
+const{ logger } = require('./middleware/middleware')
 // remember express by default cannot parse JSON in request bodies
 
 server.use(express.json());
@@ -10,13 +10,10 @@ server.use(express.json());
 
 const usersRouter = require('./users/users-router.js');
 
-// server.use((req, res, next) => {
-//   console.log(`${req.method} ${req.path}`);
-//   next();
-// });
 
 server.use('/api/users', usersRouter);
 
+server.use(logger)
 server.get('/', (req, res) => {
   res.send(`<h2>Let's write some middleware!</h2>`);
 });

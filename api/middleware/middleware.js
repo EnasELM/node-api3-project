@@ -2,7 +2,7 @@ const Users = require('../users/users-model');
 
 function logger(req, res, next) {
   // DO YOUR MAGIC
-  console.log(`${req.method} ${req.path}`);
+  console.log(`[${new Date().toLocaleString()}] ${req.method} to ${req.originalUrl}`);
   next();
 }
 
@@ -10,12 +10,12 @@ function logger(req, res, next) {
 async function validateUserId(req, res, next) {
   // DO YOUR MAGIC
   try {
-    const users= await Users.getById(req.params.id);
-    if (users) {
-      req.users = users; // saves other middlewarws a db trip
+    const user = await Users.getById(req.params.id);
+    if (user) {
+      req.user = user; // saves other middlewarws a db trip
       next();
     } else {
-      next({ status: 404, message: 'not found!' });
+     res.status(404).json( {message: 'user not found' }) ;
     }
   } catch (error) {
     next(error);
@@ -24,18 +24,23 @@ async function validateUserId(req, res, next) {
 
 function validateUser(req, res, next) {
   // DO YOUR MAGIC
-  if (!req.body.name || !req.body.name.trim()) {
-    next({ status: 400, message: "missing required name field" });
+  const { name } = req.body
+  if (!name|| !name.trim()) {
+    res.status(400).json({message: "missing required name field" })
   } else {
-    next();
+    req.name = name.trim()
+    next()
   }
 }
 
 function validatePost(req, res, next) {
   // DO YOUR MAGIC
-  if (!req.body.text) {
-    next({ status: 400, message: "missing required name field" });
+  const { text } = req.body
+  if (!text || !text.trim()) {
+    res.status(400).json({message: "missing required text field" })
+    
   } else {
+    req.text = text.trim()
     next();
   }
 }
@@ -47,4 +52,4 @@ function errorHandling(err, req, res, next) { // eslint-disable-line
 }
 
 // do not forget to expose these functions to other modules
-module.exports = { errorHandling, logger,  validateUserId, validatePost }
+module.exports = { errorHandling, logger,  validateUserId,validateUser, validatePost }
